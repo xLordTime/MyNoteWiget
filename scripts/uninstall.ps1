@@ -23,8 +23,22 @@ Write-Host ""
 
 # Beende laufende Prozesse
 Write-Host "Stopping running instances..." -ForegroundColor Yellow
-Get-Process | Where-Object { $_.ProcessName -eq "TaskBarWidget" } | Stop-Process -Force -ErrorAction SilentlyContinue
-Write-Host "Processes stopped" -ForegroundColor Green
+$processes = Get-Process | Where-Object { $_.ProcessName -eq "TaskBarWidget" }
+if ($processes) {
+    foreach ($proc in $processes) {
+        try {
+            $proc.Kill()
+            $proc.WaitForExit(5000)  # Warte max 5 Sekunden
+            Write-Host "  Stopped process (PID: $($proc.Id))" -ForegroundColor Gray
+        } catch {
+            Write-Host "  Failed to stop process (PID: $($proc.Id))" -ForegroundColor Red
+        }
+    }
+    Start-Sleep -Seconds 2  # Zusätzliche Wartezeit für Dateisystem
+    Write-Host "Processes stopped" -ForegroundColor Green
+} else {
+    Write-Host "No running instances found" -ForegroundColor Gray
+}
 
 # Entferne Autostart
 if (Test-Path $autostartShortcut) {
@@ -45,8 +59,32 @@ if (Test-Path $startMenuShortcut) {
 
 # Entferne Installationsverzeichnis
 if (Test-Path $installDir) {
-    Remove-Item $installDir -Recurse -Force
-    Write-Host "Removed installation directory" -ForegroundColor Green
+    try {
+        # Versuche mehrmals, falls Dateien noch gesperrt sind
+        $retries = 3
+        $success = $false
+        
+        for ($i = 1; $i -le $retries; $i++) {
+            try {
+                Remove-Item $installDir -Recurse -Force -ErrorAction Stop
+                $success = $true
+                break
+            } catch {
+                if ($i -lt $retries) {
+                    Write-Host "  Retry $i/$retries..." -ForegroundColor Gray
+                    Start-Sleep -Seconds 2
+                }
+            }
+        }
+        
+        if ($success) {
+            Write-Host "Removed installation directory" -ForegroundColor Green
+        } else {
+            Write-Host "Warning: Could not remove all files. Try running as administrator or restart your computer." -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "Error removing installation directory: $($_.Exception.Message)" -ForegroundColor Red
+    }
 }
 
 # Frage ob Daten gelöscht werden sollen

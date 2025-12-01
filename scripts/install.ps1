@@ -35,10 +35,35 @@ if (-not (Test-Path $installDir)) {
     Write-Host "Created installation directory" -ForegroundColor Green
 }
 
+# Prüfe ob App läuft und beende sie
+Write-Host "Checking for running instances..." -ForegroundColor Yellow
+$processes = Get-Process | Where-Object { $_.ProcessName -eq "TaskBarWidget" }
+if ($processes) {
+    Write-Host "Stopping running instances..." -ForegroundColor Yellow
+    foreach ($proc in $processes) {
+        try {
+            $proc.Kill()
+            $proc.WaitForExit(5000)
+            Write-Host "  Stopped process (PID: $($proc.Id))" -ForegroundColor Gray
+        } catch {
+            Write-Host "  Warning: Could not stop process (PID: $($proc.Id))" -ForegroundColor Yellow
+        }
+    }
+    Start-Sleep -Seconds 2
+    Write-Host "Instances stopped" -ForegroundColor Green
+}
+
 # Kopiere Dateien
 Write-Host "Copying files..." -ForegroundColor Yellow
-Copy-Item $exePath -Destination $installDir -Force
-Write-Host "Files copied successfully" -ForegroundColor Green
+try {
+    Copy-Item $exePath -Destination $installDir -Force -ErrorAction Stop
+    Write-Host "Files copied successfully" -ForegroundColor Green
+} catch {
+    Write-Host "Error copying files: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "Please close the app manually and try again." -ForegroundColor Yellow
+    Read-Host "Press Enter to exit"
+    exit 1
+}
 
 # Versionsnummer speichern (Git Commit Hash)
 Write-Host "Saving version information..." -ForegroundColor Yellow

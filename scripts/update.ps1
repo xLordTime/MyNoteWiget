@@ -46,10 +46,18 @@ function Get-LatestGitHubVersion {
 }
 
 function Stop-TaskBarWidget {
-    $process = Get-Process -Name "TaskBarWidget" -ErrorAction SilentlyContinue
-    if ($process) {
-        Write-Host "Stoppe laufende TaskBarWidget Instanz..." -ForegroundColor Yellow
-        Stop-Process -Name "TaskBarWidget" -Force -ErrorAction SilentlyContinue
+    $processes = Get-Process -Name "TaskBarWidget" -ErrorAction SilentlyContinue
+    if ($processes) {
+        Write-Host "Stoppe laufende TaskBarWidget Instanz(en)..." -ForegroundColor Yellow
+        foreach ($proc in $processes) {
+            try {
+                $proc.Kill()
+                $proc.WaitForExit(5000)
+                Write-Host "  Gestoppt (PID: $($proc.Id))" -ForegroundColor Gray
+            } catch {
+                Write-Host "  Warnung: Konnte Prozess nicht stoppen (PID: $($proc.Id))" -ForegroundColor Yellow
+            }
+        }
         Start-Sleep -Seconds 2
         return $true
     }
