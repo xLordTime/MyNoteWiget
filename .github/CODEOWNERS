@@ -4,6 +4,8 @@
 # einen Pull Request öffnet, der Code ändert, den sie besitzen.
 #
 # Weitere Informationen: https://docs.github.com/articles/about-code-owners
+#
+# Hinweis: Dieser Code wurde mit Unterstützung von KI (GitHub Copilot) entwickelt.
 
 # Standard-Eigentümer für alles im Repository
 * @xLordTime
