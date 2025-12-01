@@ -39,6 +39,19 @@ if (-not (Test-Path $installDir)) {
 Write-Host "Copying files..." -ForegroundColor Yellow
 Copy-Item $exePath -Destination $installDir -Force
 Write-Host "Files copied successfully" -ForegroundColor Green
+
+# Versionsnummer speichern (Git Commit Hash)
+Write-Host "Saving version information..." -ForegroundColor Yellow
+try {
+    $gitHash = git rev-parse --short HEAD 2>$null
+    if ($gitHash) {
+        Set-Content -Path "$installDir\version.txt" -Value $gitHash -NoNewline
+        Write-Host "Version: $gitHash" -ForegroundColor Green
+    }
+}
+catch {
+    Write-Host "Could not retrieve version information (Git not available)" -ForegroundColor Yellow
+}
 Write-Host ""
 
 # Erstelle Desktop-Verknüpfung

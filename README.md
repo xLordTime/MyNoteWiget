@@ -71,10 +71,33 @@ Nach der Installation:
 
 Das Widget startet nun automatisch beim Windows-Start!
 
+### 🔄 Update auf neue Version
+
+Wenn eine neue Version verfügbar ist:
+
+```powershell
+.\scripts\update.ps1
+```
+
+Das Update-Script:
+- ✅ Prüft automatisch ob eine neue Version auf GitHub verfügbar ist
+- ✅ Zeigt installierte vs. neueste Version
+- ✅ Lädt neue Version herunter und baut sie
+- ✅ Stoppt laufendes Widget automatisch
+- ✅ Sichert alte Version als Backup
+- ✅ Installiert neue Version
+- ✅ Startet Widget automatisch neu
+- ✅ Behält alle deine Tasks und Notizen (bleiben in %APPDATA%)
+
+**Force-Update** (neu installieren auch wenn Version gleich):
+```powershell
+.\scripts\update.ps1 -Force
+```
+
 ### 🗑️ Deinstallation
 
 ```powershell
-.\uninstall.ps1
+.\scripts\uninstall.ps1
 ```
 
 ---
