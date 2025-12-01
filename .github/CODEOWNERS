@@ -1,0 +1,29 @@
+# CODEOWNERS
+# Diese Datei definiert die Code-Eigentümer für dieses Repository.
+# Code-Eigentümer werden automatisch für Reviews angefragt, wenn jemand
+# einen Pull Request öffnet, der Code ändert, den sie besitzen.
+#
+# Weitere Informationen: https://docs.github.com/articles/about-code-owners
+
+# Standard-Eigentümer für alles im Repository
+* @xLordTime
+
+# Core Application Code
+/src/ @xLordTime
+/App.xaml @xLordTime
+/App.xaml.cs @xLordTime
+
+# Scripts (Installation, Build, Update)
+/scripts/ @xLordTime
+
+# Assets und Ressourcen
+/assets/ @xLordTime
+
+# Konfigurationsdateien
+*.csproj @xLordTime
+*.config @xLordTime
+*.json @xLordTime
+
+# Dokumentation
+README.md @xLordTime
+LICENSE @xLordTime
