@@ -158,11 +158,52 @@ Das Widget verwendet Serilog für umfangreiches Logging:
   - Serilog 3.1.1
   - Serilog.Sinks.File 5.0.0
 
+### 📁 Projekt-Struktur
+
+```
+TaskBar - Addon/
+├── src/
+│   ├── Views/          # Hauptfenster und UI-Komponenten
+│   │   └── MainWindow.xaml(.cs)
+│   ├── Dialogs/        # Dialog-Fenster
+│   │   ├── EditTaskDialog.xaml(.cs)
+│   │   └── SubTaskDialog.xaml(.cs)
+│   └── Resources/      # Themes und Styles
+│       └── Themes.xaml
+├── scripts/            # PowerShell Installations-Skripte
+│   ├── install.ps1
+│   └── uninstall.ps1
+├── App.xaml(.cs)       # Anwendungs-Einstiegspunkt
+├── TaskBarWidget.csproj
+└── README.md
+```
+
+### 📖 Code-Dokumentation
+
+Der gesamte Code ist **vollständig dokumentiert** nach **DIN EN ISO 9241** Standard:
+
+- ✅ **Aufgabenangemessenheit** - Jede Funktion ist klar auf ihren Zweck fokussiert
+- ✅ **Selbstbeschreibungsfähigkeit** - Umfassende XML-Kommentare für alle Klassen und Methoden
+- ✅ **Erwartungskonformität** - Standard-Patterns und bekannte Interaktionsmuster
+- ✅ **Fehlertoleranz** - Exception-Handling und Auto-Save dokumentiert
+- ✅ **Steuerbarkeit** - Keyboard-Navigation und Hotkey-System erklärt
+- ✅ **Individualisierbarkeit** - Theme-System und Anpassungsmöglichkeiten
+- ✅ **Lernförderlichkeit** - Intuitive Bedienung mit Erklärungen
+
+Alle Methoden enthalten:
+- Zweck und Funktionsweise
+- DIN EN ISO 9241 Bezüge
+- Barrierefreiheit-Aspekte
+- Threading-Hinweise
+- Windows API Dokumentation (P/Invoke)
+
 ## Anpassungen
 
 Sie können das Widget anpassen, indem Sie folgende Dateien bearbeiten:
-- `MainWindow.xaml` - UI-Design und Layout
-- `MainWindow.xaml.cs` - Logik und Funktionalität
+- `src/Views/MainWindow.xaml(.cs)` - UI-Design und Hauptlogik
+- `src/Dialogs/` - Dialog-Fenster für Subtasks und Bearbeitung
+- `src/Resources/Themes.xaml` - Farben und Styles (Dark/Light Mode)
+- `App.xaml(.cs)` - Anwendungsstart und globale Ressourcen
 - `TaskBarWidget.csproj` - Projektkonfiguration
 
 ## Lizenz
