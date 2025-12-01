@@ -43,38 +43,66 @@ Ein elegantes Desktop-Widget für Windows zum Verwalten von Tasks und Notes.
 
 ## Installation & Ausführung
 
-### Voraussetzungen
+### 🚀 Schnellinstallation (Empfohlen)
+
+1. **Build erstellen:**
+   ```powershell
+   .\build.ps1
+   ```
+
+2. **Installieren:**
+   ```powershell
+   .\install.ps1
+   ```
+
+Das Installationsskript:
+- Erstellt eine ausführbare Datei
+- Installiert das Widget nach `%LOCALAPPDATA%\TaskBarWidget`
+- Erstellt Desktop- und Startmenü-Verknüpfungen
+- Startet das Widget automatisch
+
+### ⚙️ Autostart einrichten
+
+Nach der Installation:
+1. Widget öffnen (**Rechts-Shift + Rechts-Strg**)
+2. Klicken Sie auf **⚙️ Settings** (oben rechts)
+3. Aktivieren Sie **"Autostart mit Windows"**
+4. Klicken Sie auf **Speichern**
+
+Das Widget startet nun automatisch beim Windows-Start!
+
+### 🗑️ Deinstallation
+
+```powershell
+.\uninstall.ps1
+```
+
+---
+
+### 👨‍💻 Für Entwickler
+
+**Voraussetzungen:**
 - .NET 8.0 SDK oder höher
 - Windows 10/11
 
-### Projekt bauen und ausführen
+**Projekt bauen und ausführen:**
 
-1. Öffnen Sie ein Terminal im Projektordner
+1. Projekt wiederherstellen:
+   ```powershell
+   dotnet restore
+   ```
 
-2. Projekt wiederherstellen:
-```powershell
-dotnet restore
-```
+2. Projekt ausführen:
+   ```powershell
+   dotnet run
+   ```
 
-3. Projekt bauen:
-```powershell
-dotnet build
-```
-
-4. Projekt ausführen:
-```powershell
-dotnet run
-```
-
-### Ausführbare Datei erstellen
-
-Für Release-Build:
+**Manuelle Build-Erstellung:**
 ```powershell
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 ```
 
-Die ausführbare Datei finden Sie dann in:
-`bin\Release\net8.0-windows\win-x64\publish\TaskBarWidget.exe`
+Die exe finden Sie in: `bin\Release\net8.0-windows\win-x64\publish\`
 
 ## Verwendung
 

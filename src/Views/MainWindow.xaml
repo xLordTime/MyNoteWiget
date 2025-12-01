@@ -93,6 +93,11 @@
                            Click="ThemeToggleButton_Click"
                            ToolTip="Toggle Dark/Light Mode"
                            Margin="0,0,5,0"/>
+                    <Button Content="⚙️" 
+                           Style="{StaticResource IconButton}"
+                           Click="SettingsButton_Click"
+                           ToolTip="Settings"
+                           Margin="0,0,5,0"/>
                     <Button Content="➖" 
                            Style="{StaticResource IconButton}"
                            Click="MinimizeButton_Click"

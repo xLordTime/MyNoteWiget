@@ -1,0 +1,99 @@
+<Window x:Class="TaskBarWidget.SettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Einstellungen"
+        Height="250" 
+        Width="450"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+    
+    <Border Background="{DynamicResource SecondaryBackgroundBrush}" 
+            BorderBrush="{DynamicResource BorderBrush}" 
+            BorderThickness="2"
+            CornerRadius="12"
+            Padding="20">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" 
+                            ShadowDepth="0" 
+                            Opacity="0.3" 
+                            Color="Black"/>
+        </Border.Effect>
+        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Header -->
+            <TextBlock Grid.Row="0" 
+                      Text="⚙️ Einstellungen"
+                      FontSize="18"
+                      FontWeight="Bold"
+                      Foreground="{DynamicResource TextPrimaryBrush}"
+                      Margin="0,0,0,20"/>
+            
+            <!-- Settings -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                <Border Background="{DynamicResource BackgroundBrush}"
+                       BorderBrush="{DynamicResource BorderBrush}"
+                       BorderThickness="1"
+                       CornerRadius="8"
+                       Padding="15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Autostart mit Windows"
+                                     FontSize="14"
+                                     FontWeight="SemiBold"
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                     Margin="0,0,0,5"/>
+                            <TextBlock Text="Widget startet automatisch beim Windows-Start"
+                                     FontSize="12"
+                                     Foreground="{DynamicResource TextSecondaryBrush}"
+                                     TextWrapping="Wrap"/>
+                        </StackPanel>
+                        
+                        <CheckBox Grid.Column="1"
+                                 x:Name="AutostartCheckBox"
+                                 VerticalAlignment="Center"
+                                 Style="{StaticResource ModernCheckBox}"
+                                 Margin="15,0,0,0"/>
+                    </Grid>
+                </Border>
+                
+                <TextBlock Text="💡 Tipp: Nutze Rechts-Shift + Rechts-Strg zum Öffnen/Schließen"
+                          FontSize="11"
+                          Foreground="{DynamicResource TextSecondaryBrush}"
+                          Margin="0,15,0,0"
+                          TextWrapping="Wrap"
+                          HorizontalAlignment="Center"/>
+            </StackPanel>
+            
+            <!-- Buttons -->
+            <StackPanel Grid.Row="2" 
+                       Orientation="Horizontal" 
+                       HorizontalAlignment="Right">
+                <Button Content="Abbrechen"
+                       Width="100"
+                       Height="38"
+                       Style="{StaticResource IconButton}"
+                       Click="Cancel_Click"
+                       Margin="0,0,10,0"/>
+                <Button Content="Speichern"
+                       Width="120"
+                       Height="38"
+                       Style="{StaticResource ModernButton}"
+                       Click="OK_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
