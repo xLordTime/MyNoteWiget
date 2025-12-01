@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using System.Windows;
 
 namespace TaskBarWidget
@@ -32,22 +34,27 @@ namespace TaskBarWidget
     public partial class App : Application
     {
         /// <summary>
+        /// Mutex für Single-Instance Enforcement
+        /// Verhindert dass mehrere Instanzen der Anwendung gleichzeitig laufen
+        /// </summary>
+        private static Mutex? _mutex = null;
+        
+        /// <summary>
         /// Override: Wird beim Anwendungsstart aufgerufen
         /// 
         /// DIN EN ISO 9241-110:
         /// - Aufgabenangemessenheit: Ermöglicht zentrale Initialisierung
-        /// - Fehlertoleranz: Kann globales Exception-Handling einrichten
+        /// - Fehlertoleranz: Single-Instance Enforcement verhindert Mehrfach-Instanzen
+        /// - Ressourcenschonung: Nur eine Instanz = weniger RAM/CPU-Verbrauch
         /// 
-        /// Aktuell minimal:
-        /// - Nur base.OnStartup(e) Aufruf
-        /// - Keine zusätzliche Logik nötig (MainWindow initialisiert sich selbst)
+        /// Single-Instance Pattern:
+        /// - Mutex mit eindeutiger GUID als Name
+        /// - Prüft ob bereits eine Instanz läuft
+        /// - Beendet sich selbst wenn Duplikat erkannt
         /// 
-        /// Mögliche Erweiterungen:
-        /// - Globales Exception-Handling via DispatcherUnhandledException
-        /// - Command-Line Argument Parsing (e.Args)
-        /// - Single-Instance Enforcement (Mutex)
-        /// - Splash Screen
-        /// - Dependency Injection Container Setup
+        /// Ressourcen-Optimierung:
+        /// - ShutdownMode.OnExplicitShutdown: Keine automatische Beendigung
+        /// - Dispatcher Priority optimiert für Background-Anwendungen
         /// 
         /// Parameter:
         /// - e.Args: Command-Line Argumente (string[])
@@ -56,13 +63,63 @@ namespace TaskBarWidget
         /// <param name="e">Startup Event Arguments mit Command-Line Args</param>
         protected override void OnStartup(StartupEventArgs e)
         {
+            // ========================================
+            // SINGLE-INSTANCE ENFORCEMENT
+            // ========================================
+            // Verhindert dass 100+ Instanzen parallel laufen
+            // Mutex = Mutual Exclusion Object (systemweit)
+            
+            const string mutexName = "Global\\{8F6F0AC4-B9A1-45FD-A8E3-11E10C5C87E9}";
+            
+            _mutex = new Mutex(true, mutexName, out bool createdNew);
+            
+            if (!createdNew)
+            {
+                // Bereits eine Instanz läuft!
+                MessageBox.Show(
+                    "TaskBar Widget läuft bereits!\n\nVerwenden Sie Rechts-Shift + Rechts-Strg um das Widget zu öffnen.",
+                    "Bereits gestartet",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+                
+                // Anwendung sofort beenden (keine zweite Instanz starten)
+                Current.Shutdown();
+                return;
+            }
+            
+            // ========================================
+            // RESSOURCEN-OPTIMIERUNG
+            // ========================================
+            
+            // Process Priority: Niedrigere Prozess-Priorität für Hintergrund-Betrieb
+            // Spart CPU wenn Anwendung im Hintergrund läuft
+            try
+            {
+                using var process = System.Diagnostics.Process.GetCurrentProcess();
+                process.PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal;
+            }
+            catch
+            {
+                // Ignoriere Fehler bei Priority-Änderung (nicht kritisch)
+            }
+            
             base.OnStartup(e);
             
-            // Minimaler Einstiegspunkt:
-            // - base.OnStartup() triggert Window-Erstellung via StartupUri
-            // - MainWindow Konstruktor übernimmt weitere Initialisierung
-            // - Serilog wird in MainWindow Constructor eingerichtet
-            // - Keyboard Hook wird in MainWindow Constructor installiert
+            // Shutdown-Modus: Explizit (nicht beim letzten Fenster schließen)
+            // Widget läuft im Hintergrund weiter
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        }
+        
+        /// <summary>
+        /// Override: Aufräumen beim Beenden der Anwendung
+        /// Mutex freigeben für sauberen Shutdown
+        /// </summary>
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _mutex?.ReleaseMutex();
+            _mutex?.Dispose();
+            base.OnExit(e);
         }
     }
 }

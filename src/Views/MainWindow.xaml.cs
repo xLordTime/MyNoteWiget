@@ -98,6 +98,12 @@ namespace TaskBarWidget
         private const string AutostartValueName = "TaskBarWidget";
         
         /// <summary>
+        /// Idle-Timer: Reduziert UI-Updates wenn Widget versteckt ist
+        /// Ressourcen-Optimierung: CPU-Schonend im Hintergrund
+        /// </summary>
+        private DispatcherTimer? _idleTimer;
+        
+        /// <summary>
         /// Konstruktor: Initialisiert das Hauptfenster und alle Subsysteme
         /// 
         /// DIN EN ISO 9241-110 Prinzipien:
@@ -167,9 +173,19 @@ namespace TaskBarWidget
             // ========================================
             // Fehlertoleranz: Automatisches Speichern verhindert Datenverlust
             // Selbstbeschreibungsfähigkeit: 2-Sekunden-Verzögerung für optimale UX
-            _saveTimer = new DispatcherTimer();
+            // Ressourcen-Optimierung: Niedrige Priorität für Timer-Events
+            _saveTimer = new DispatcherTimer(DispatcherPriority.Background);
             _saveTimer.Interval = TimeSpan.FromSeconds(2);
             _saveTimer.Tick += SaveTimer_Tick;
+            
+            // ========================================
+            // 4b. Idle-Timer für Ressourcen-Optimierung
+            // ========================================
+            // Reduziert Hintergrund-Aktivität wenn Widget versteckt ist
+            _idleTimer = new DispatcherTimer(DispatcherPriority.Background);
+            _idleTimer.Interval = TimeSpan.FromMinutes(5);
+            _idleTimer.Tick += IdleTimer_Tick;
+            _idleTimer.Start();
             
             // ========================================
             // 5. Gespeicherte Daten laden
@@ -210,10 +226,42 @@ namespace TaskBarWidget
         /// <summary>
         /// Event-Handler: Fenster vollständig geladen
         /// Wird nach Konstruktor und InitializeComponent aufgerufen
+        /// 
+        /// Ressourcen-Optimierung:
+        /// - Reduziert Rendering-Updates wenn Fenster versteckt
         /// </summary>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Log.Information("Window loaded event triggered");
+            
+            // Ressourcen-Optimierung: Rendering bei verstecktem Fenster pausieren
+            if (this.Visibility == Visibility.Hidden)
+            {
+                // Niedrige Rendering-Priority für verstecktes Fenster
+                System.Windows.Media.RenderOptions.SetBitmapScalingMode(
+                    this, System.Windows.Media.BitmapScalingMode.LowQuality);
+            }
+        }
+        
+        /// <summary>
+        /// Idle-Timer Tick: Ressourcen-Cleanup bei längerer Inaktivität
+        /// 
+        /// Ressourcen-Optimierung:
+        /// - Memory Cleanup alle 5 Minuten
+        /// - Nur wenn Widget versteckt ist
+        /// - GC.Collect im Optimized Mode (nicht aggressiv)
+        /// </summary>
+        private void IdleTimer_Tick(object? sender, EventArgs e)
+        {
+            if (this.Visibility == Visibility.Hidden)
+            {
+                // Memory Cleanup bei verstecktem Widget
+                if (GC.GetTotalMemory(false) > 30 * 1024 * 1024) // > 30 MB
+                {
+                    GC.Collect(2, GCCollectionMode.Optimized, false);
+                    Log.Debug("Idle memory cleanup performed");
+                }
+            }
         }
         
         /// <summary>
@@ -238,13 +286,18 @@ namespace TaskBarWidget
         /// - Selbstbeschreibungsfähigkeit: Logging für Nachvollziehbarkeit
         /// 
         /// Cleanup-Reihenfolge (kritisch):
-        /// 1. Keyboard Hook deregistrieren (verhindert Memory Leaks)
-        /// 2. Daten speichern (verhindert Datenverlust)
-        /// 3. Logger schließen (stellt sauberes Herunterfahren sicher)
+        /// 1. Timer stoppen (verhindert Events nach Dispose)
+        /// 2. Keyboard Hook deregistrieren (verhindert Memory Leaks)
+        /// 3. Daten speichern (verhindert Datenverlust)
+        /// 4. Logger schließen (stellt sauberes Herunterfahren sicher)
         /// </summary>
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
+            
+            // Timer stoppen und freigeben
+            _saveTimer?.Stop();
+            _idleTimer?.Stop();
             
             // Keyboard Hook freigeben
             UnhookWindowsHookEx(_hookID);
@@ -523,6 +576,10 @@ namespace TaskBarWidget
                 var slideOut = (System.Windows.Media.Animation.Storyboard)this.FindResource("SlideOutAnimation");
                 slideOut.Begin(MainBorder);
                 Log.Information("Widget hiding with animation");
+                
+                // Ressourcen-Optimierung: Rendering-Quality reduzieren
+                System.Windows.Media.RenderOptions.SetBitmapScalingMode(
+                    this, System.Windows.Media.BitmapScalingMode.LowQuality);
             }
             else if (!_isClosing)
             {
@@ -530,6 +587,10 @@ namespace TaskBarWidget
                 PositionWindowRight();  // Erwartungskonformität: Konsistente Position
                 this.Visibility = Visibility.Visible;
                 this.Activate();        // Fenster in Vordergrund bringen
+                
+                // Ressourcen-Optimierung: Rendering-Quality erhöhen für sichtbares Fenster
+                System.Windows.Media.RenderOptions.SetBitmapScalingMode(
+                    this, System.Windows.Media.BitmapScalingMode.HighQuality);
                 
                 var slideIn = (System.Windows.Media.Animation.Storyboard)this.FindResource("SlideInAnimation");
                 slideIn.Begin(MainBorder);
